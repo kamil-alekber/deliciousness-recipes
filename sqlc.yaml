@@ -1,0 +1,10 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    queries: "internal/sql/recipes/query.sql"
+    schema: "internal/sql/recipes/schema.sql"
+    gen:
+      go:
+        package: "recipes"
+        out: "internal/models/recipes"
+        emit_result_struct_pointers: true

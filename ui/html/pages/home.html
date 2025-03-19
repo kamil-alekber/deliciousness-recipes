@@ -1,0 +1,32 @@
+{{define "title"}} Home {{end}} {{define "main"}}
+
+<main class="container mx-auto p-4">
+    <section class="mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Latest Recipes</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {{if .Recipes}} {{range .Recipes}}
+            <article class="bg-white p-4 rounded-lg shadow-md">
+                <img
+                    src="recipe1.jpg"
+                    alt="Recipe 1"
+                    class="w-full h-48 object-cover rounded-t-lg"
+                />
+                <div class="p-4">
+                    <h3 class="text-xl font-bold mb-2">{{.Name}}</h3>
+                    <p class="text-gray-700">{{.Description}}</p>
+                    <a
+                        href="/recipe/view?id={{.ID}}"
+                        class="text-blue-600 hover:underline"
+                    >
+                        View Recipe
+                    </a>
+                </div>
+            </article>
+            {{end}} {{else}}
+            <p class="text-gray-700">There's nothing to see here... yet!</p>
+            {{end}}
+        </div>
+    </section>
+</main>
+
+{{end}}
