@@ -1,34 +1,37 @@
 {{define "title"}} Recipe #{{.Recipe.ID}} {{end}} {{define "main"}}
 
-<main class="container mx-auto p-4">
+<main class="container mx-auto p-4 flex-1">
     {{with .Recipe}}
 
     <article class="bg-white p-6 rounded-lg shadow-md">
         <header class="mb-4">
             <h2 class="text-3xl font-bold mb-2">{{.Name}}</h2>
             <p class="text-gray-600">By Author Name | Date Published</p>
+            <p class="text-sm text-gray-700">
+                {{.CreatedAt | humanDate | printf "Created: %s"}}
+            </p>
+            <p class="text-sm text-gray-700">
+                {{.UpdatedAt | humanDate | printf "Updated: %s"}}
+            </p>
+            <p class="text-sm text-gray-700">
+                {{.CookingTime | printf "Time to Cook: %d mins"}}
+            </p>
         </header>
         <img
-            src="recipe-image.jpg"
-            alt="Recipe Image"
+            src="{{ if .Image }}{{ .Image }}{{ else }}https://storage.googleapis.com/deliciousness-recipes/stock.jpg{{ end }}"
+            alt="{{ .Name }}"
             class="w-full h-64 object-cover rounded-lg mb-4"
         />
         <section class="mb-6">
             <h3 class="text-2xl font-semibold mb-2">Ingredients</h3>
             <ul class="list-disc list-inside">
-                <li>Ingredient 1</li>
-                <li>Ingredient 2</li>
-                <li>Ingredient 3</li>
-                <!-- Add more ingredients as needed -->
+                {{.Ingredients}}
             </ul>
         </section>
         <section class="mb-6">
             <h3 class="text-2xl font-semibold mb-2">Instructions</h3>
             <ol class="list-decimal list-inside">
-                <li>Step 1: Description of step 1.</li>
-                <li>Step 2: Description of step 2.</li>
-                <li>Step 3: Description of step 3.</li>
-                <!-- Add more steps as needed -->
+                {{.Instructions}}
             </ol>
         </section>
         <section>

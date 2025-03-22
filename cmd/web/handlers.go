@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"math/rand/v2"
 	"net/http"
 	"strconv"
@@ -13,7 +14,7 @@ import (
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		app.notFound(w)
+		app.render(w, http.StatusNotFound, "404.html", app.newTemplateData(r))
 		return
 	}
 
@@ -32,7 +33,7 @@ func (app *application) recipeView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 
 	if err != nil || id < 1 {
-		app.notFound(w)
+		app.render(w, http.StatusNotFound, "404.html", app.newTemplateData(r))
 		return
 	}
 
@@ -56,24 +57,53 @@ func (app *application) recipeView(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) recipeCreate(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", http.MethodPost)
-		app.clientError(w, http.StatusMethodNotAllowed)
+	if r.Method == http.MethodGet {
+		app.render(w, http.StatusOK, "create.html", app.newTemplateData(r))
 		return
 	}
 
-	newRecipe, err := app.recipes.CreateRecipe(context.Background(), recipes.CreateRecipeParams{
-		ID:          rand.Int64(),
-		Name:        "New Recipe",
-		Description: "Description of the new recipe",
-		// Ingredients:  []string{"Ingredient 1", "Ingredient 2"},
-		// Instructions: []string{"Instruction 1", "Instruction 2"},
-	})
+	if r.Method == http.MethodPost {
+		err := r.ParseForm()
 
-	if err != nil {
-		app.serverError(w, err)
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		name := r.Form.Get("name")
+		description := r.Form.Get("description")
+		ingredients := r.Form.Get("ingredients")
+		instructions := r.Form.Get("instructions")
+
+		cookingTime, err := strconv.Atoi(r.PostForm.Get("cook_time"))
+
+		if err != nil {
+			app.infoLog.Printf("parse form error in here: %v", err.Error())
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		newRecipe, err := app.recipes.CreateRecipe(context.Background(), recipes.CreateRecipeParams{
+			ID:           rand.Int64(),
+			Name:         name,
+			Description:  description,
+			Ingredients:  ingredients,
+			Instructions: instructions,
+			CookingTime:  int64(cookingTime),
+		})
+
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+		app.infoLog.Printf("create new recipe %d", newRecipe.ID)
+		http.Redirect(w, r, fmt.Sprintf("/recipe/view?id=%d", newRecipe.ID), http.StatusSeeOther)
 		return
 	}
 
-	w.Write([]byte{byte(newRecipe.ID)})
+	w.Header().Set("Allow", http.MethodPost)
+	w.Header().Set("Allow", http.MethodGet)
+
+	app.clientError(w, http.StatusMethodNotAllowed)
+
 }

@@ -14,19 +14,30 @@ SELECT
 FROM
     recipes
 ORDER BY
-    name DESC;
+    created_at DESC;
 
 -- name: CreateRecipe :one
 INSERT INTO
-    recipes (id, name, description)
+    recipes (
+        id,
+        name,
+        description,
+        ingredients,
+        instructions,
+        cooking_time
+    )
 VALUES
-    (?, ?, ?) RETURNING *;
+    (?, ?, ?, ?, ?, ?) RETURNING *;
 
 -- name: UpdateRecipe :exec
 UPDATE recipes
 SET
     name = ?,
-    description = ?
+    description = ?,
+    updated_at = ?,
+    ingredients = ?,
+    instructions = ?,
+    cooking_time = ?
 WHERE
     id = ?;
 

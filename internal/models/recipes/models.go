@@ -4,8 +4,18 @@
 
 package recipes
 
+import (
+	"time"
+)
+
 type Recipe struct {
-	ID          int64
-	Name        string
-	Description string
+	ID           int64
+	Name         string
+	Description  string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Ingredients  string
+	Instructions string
+	CookingTime  int64
+	Image        string
 }

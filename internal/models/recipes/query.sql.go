@@ -7,25 +7,53 @@ package recipes
 
 import (
 	"context"
+	"time"
 )
 
 const createRecipe = `-- name: CreateRecipe :one
 INSERT INTO
-    recipes (id, name, description)
+    recipes (
+        id,
+        name,
+        description,
+        ingredients,
+        instructions,
+        cooking_time
+    )
 VALUES
-    (?, ?, ?) RETURNING id, name, description
+    (?, ?, ?, ?, ?, ?) RETURNING id, name, description, created_at, updated_at, ingredients, instructions, cooking_time, image
 `
 
 type CreateRecipeParams struct {
-	ID          int64
-	Name        string
-	Description string
+	ID           int64
+	Name         string
+	Description  string
+	Ingredients  string
+	Instructions string
+	CookingTime  int64
 }
 
 func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (*Recipe, error) {
-	row := q.db.QueryRowContext(ctx, createRecipe, arg.ID, arg.Name, arg.Description)
+	row := q.db.QueryRowContext(ctx, createRecipe,
+		arg.ID,
+		arg.Name,
+		arg.Description,
+		arg.Ingredients,
+		arg.Instructions,
+		arg.CookingTime,
+	)
 	var i Recipe
-	err := row.Scan(&i.ID, &i.Name, &i.Description)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Ingredients,
+		&i.Instructions,
+		&i.CookingTime,
+		&i.Image,
+	)
 	return &i, err
 }
 
@@ -42,7 +70,7 @@ func (q *Queries) DeleteRecipe(ctx context.Context, id int64) error {
 
 const getRecipe = `-- name: GetRecipe :one
 SELECT
-    id, name, description
+    id, name, description, created_at, updated_at, ingredients, instructions, cooking_time, image
 FROM
     recipes
 WHERE
@@ -54,17 +82,27 @@ LIMIT
 func (q *Queries) GetRecipe(ctx context.Context, id int64) (*Recipe, error) {
 	row := q.db.QueryRowContext(ctx, getRecipe, id)
 	var i Recipe
-	err := row.Scan(&i.ID, &i.Name, &i.Description)
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Description,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Ingredients,
+		&i.Instructions,
+		&i.CookingTime,
+		&i.Image,
+	)
 	return &i, err
 }
 
 const listRecipes = `-- name: ListRecipes :many
 SELECT
-    id, name, description
+    id, name, description, created_at, updated_at, ingredients, instructions, cooking_time, image
 FROM
     recipes
 ORDER BY
-    name DESC
+    created_at DESC
 `
 
 func (q *Queries) ListRecipes(ctx context.Context) ([]*Recipe, error) {
@@ -76,7 +114,17 @@ func (q *Queries) ListRecipes(ctx context.Context) ([]*Recipe, error) {
 	var items []*Recipe
 	for rows.Next() {
 		var i Recipe
-		if err := rows.Scan(&i.ID, &i.Name, &i.Description); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Ingredients,
+			&i.Instructions,
+			&i.CookingTime,
+			&i.Image,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)
@@ -94,18 +142,34 @@ const updateRecipe = `-- name: UpdateRecipe :exec
 UPDATE recipes
 SET
     name = ?,
-    description = ?
+    description = ?,
+    updated_at = ?,
+    ingredients = ?,
+    instructions = ?,
+    cooking_time = ?
 WHERE
     id = ?
 `
 
 type UpdateRecipeParams struct {
-	Name        string
-	Description string
-	ID          int64
+	Name         string
+	Description  string
+	UpdatedAt    time.Time
+	Ingredients  string
+	Instructions string
+	CookingTime  int64
+	ID           int64
 }
 
 func (q *Queries) UpdateRecipe(ctx context.Context, arg UpdateRecipeParams) error {
-	_, err := q.db.ExecContext(ctx, updateRecipe, arg.Name, arg.Description, arg.ID)
+	_, err := q.db.ExecContext(ctx, updateRecipe,
+		arg.Name,
+		arg.Description,
+		arg.UpdatedAt,
+		arg.Ingredients,
+		arg.Instructions,
+		arg.CookingTime,
+		arg.ID,
+	)
 	return err
 }

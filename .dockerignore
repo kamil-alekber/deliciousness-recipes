@@ -1,0 +1,11 @@
+.git/
+.gitignore
+.gcloudignore
+.DS_Store
+*.db
+*.log
+dist/
+build/
+out/
+.github/
+.dockerignore
