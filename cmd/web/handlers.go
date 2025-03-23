@@ -23,10 +23,30 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
+
 	data := app.newTemplateData(r)
 	data.Recipes = recipesList
 
+	// migrate to middleware or put inside the context?
+	userId, _ := r.Cookie("userid")
+
+	if userId != nil {
+		user, err := app.users.GetUser(context.Background(), userId.Value)
+
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		data.User = user
+	}
+
 	app.render(w, http.StatusOK, "home.html", data)
+}
+
+func (app *application) login(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	app.render(w, http.StatusOK, "login.html", data)
 }
 
 func (app *application) recipeView(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +116,7 @@ func (app *application) recipeCreate(w http.ResponseWriter, r *http.Request) {
 			app.serverError(w, err)
 			return
 		}
-		app.infoLog.Printf("create new recipe %d", newRecipe.ID)
+
 		http.Redirect(w, r, fmt.Sprintf("/recipe/view?id=%d", newRecipe.ID), http.StatusSeeOther)
 		return
 	}

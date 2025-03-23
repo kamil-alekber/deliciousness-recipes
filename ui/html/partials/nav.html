@@ -2,7 +2,8 @@
 <header class="bg-green-600 text-white p-4">
     <div class="container mx-auto">
         <h1 class="text-3xl font-bold">Delicious Recipes</h1>
-        <nav class="mt-2">
+
+        <nav class="mt-2 flex justify-between">
             <ul class="flex space-x-4">
                 <li><a href="/" class="hover:underline">Home</a></li>
                 <li>
@@ -11,6 +12,24 @@
                     >
                 </li>
             </ul>
+
+            {{if .User}} {{ with .User }}
+
+            <div class="flex items-center space-x-3">
+                <span>{{.Name}}</span>
+                <div
+                    class="w-10 h-10 rounded-full overflow-hidden border border-gray-300"
+                >
+                    <img
+                        src="{{.Picture}}"
+                        alt="Profile Photo"
+                        class="w-full h-full object-cover"
+                    />
+                </div>
+            </div>
+            {{end}} {{else}}
+            <a href="/login" class="hover:underline">Login</a>
+            {{end}}
         </nav>
     </div>
 </header>

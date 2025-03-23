@@ -1,10 +1,28 @@
 version: "2"
 sql:
-  - engine: "sqlite"
-    queries: "internal/sql/recipes/query.sql"
-    schema: "internal/sql/recipes/schema.sql"
+  - engine: sqlite
+    queries: internal/sql/recipes/query.sql
+    schema: internal/sql/recipes/schema.sql
     gen:
       go:
-        package: "recipes"
-        out: "internal/models/recipes"
+        package: recipes
+        out: internal/models/recipes
+        emit_result_struct_pointers: true
+
+  - engine: sqlite
+    queries: internal/sql/users/query.sql
+    schema: internal/sql/users/schema.sql
+    gen:
+      go:
+        package: users
+        out: internal/models/users
+        emit_result_struct_pointers: true
+
+  - engine: sqlite
+    queries: internal/sql/tokens/query.sql
+    schema: internal/sql/tokens/schema.sql
+    gen:
+      go:
+        package: tokens
+        out: internal/models/tokens
         emit_result_struct_pointers: true

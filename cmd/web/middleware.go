@@ -8,7 +8,7 @@ import (
 func secureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// add https://storage.googleapis.com/ to content se
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; img-src 'self' storage.googleapis.com; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; img-src 'self' *.googleusercontent.com storage.googleapis.com; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
 		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("X-Frame-Options", "deny")

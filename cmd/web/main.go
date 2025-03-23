@@ -12,6 +12,8 @@ import (
 	"os"
 
 	"github.com/kamil-alekber/deliciousness-recipes/internal/models/recipes"
+	"github.com/kamil-alekber/deliciousness-recipes/internal/models/tokens"
+	"github.com/kamil-alekber/deliciousness-recipes/internal/models/users"
 	_ "modernc.org/sqlite"
 )
 
@@ -19,6 +21,9 @@ type config struct {
 	dsn       string
 	addr      string
 	staticDir string
+
+	googleClientID     string
+	googleClientSecret string
 }
 
 var cfg config
@@ -27,6 +32,8 @@ type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
 	recipes       *recipes.Queries
+	users         *users.Queries
+	tokens        *tokens.Queries
 	templateCache map[string]*template.Template
 }
 
@@ -61,7 +68,9 @@ func initDbTables(db *sql.DB) error {
 func main() {
 	flag.StringVar(&cfg.addr, "addr", ":4000", "HTTP network address")
 	flag.StringVar(&cfg.staticDir, "static-dir", "./ui/static", "Path to static assets")
-	flag.StringVar(&cfg.dsn, "dsn", "store.db", "mysql data source name")
+	flag.StringVar(&cfg.dsn, "dsn", "store.db", "sql data source name")
+	flag.StringVar(&cfg.googleClientID, "google-client-id", os.Getenv("CLIENT_ID"), "Google client ID for OAuth2")
+	flag.StringVar(&cfg.googleClientSecret, "google-client-secret", os.Getenv("CLIENT_SECRET"), "Google client secret for OAuth2")
 
 	flag.Parse()
 
@@ -88,6 +97,8 @@ func main() {
 		errorLog:      errorLog,
 		infoLog:       infoLog,
 		recipes:       recipes.New(db),
+		users:         users.New(db),
+		tokens:        tokens.New(db),
 		templateCache: templateCache,
 	}
 

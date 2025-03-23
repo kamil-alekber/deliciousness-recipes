@@ -6,12 +6,14 @@ import (
 	"time"
 
 	"github.com/kamil-alekber/deliciousness-recipes/internal/models/recipes"
+	"github.com/kamil-alekber/deliciousness-recipes/internal/models/users"
 )
 
 type templateData struct {
 	CurrentYear int
 	Recipe      *recipes.Recipe
 	Recipes     []*recipes.Recipe
+	User        *users.User
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
